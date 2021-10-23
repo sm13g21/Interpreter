@@ -3,7 +3,8 @@ import java.io.*;
 
 public class FReading {
 
-    public String codeLineHolder[];
+    private boolean addressCheck;
+    private String[] codeLineHolder;
 
     public static void fileInputCheck(String addressImport){
         FReading ReaderClass = new FReading();
@@ -11,11 +12,22 @@ public class FReading {
         if(addressImport != null){
             System.out.println("Address accepted");
             //ReaderClass.fileReader
-            filePathFull(addressImport);
+            ReaderClass.validAddress(true);
         }
         else{
             System.out.println("Please enter the address of the file!");
+            ReaderClass.validAddress(false);
         }
+    }
+
+    public void validAddress(boolean result){
+        this.addressCheck = result;
+    }
+
+    public boolean checkAddress(){
+        boolean checkingAddy;
+        checkingAddy = this.addressCheck;
+        return checkingAddy;
     }
 
     public static String filePathFull(String addImport){
@@ -27,10 +39,6 @@ public class FReading {
             System.out.println(fileNameArray[i].getName());
 
         }
-
-
-
-
         return fullFilePath;
     }
 
