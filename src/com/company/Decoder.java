@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Decoder {
 
     private static int lineCounter;
+    private static int interpreterLine;
     private static ArrayList<String> opCodeHold = new ArrayList<String>(); // Holds opcode
     private static ArrayList<String> opErandHold = new ArrayList<String>(); // Holds Operand
 
@@ -76,10 +77,8 @@ public class Decoder {
                 System.out.println(variableValue.get(varPosition(operandString)));
                 currentPos++;
             }else if(opcodeString.contains("while")) {
-                loop(variableValue.get(varPosition(operandString)));
+                variableValue.add(varPosition(operandString),loop(variableValue.get(varPosition(operandString))));
                 System.out.println(variableValue.get(varPosition(operandString)));
-
-
             }else{
                 System.exit(0);
             }
@@ -109,27 +108,68 @@ public class Decoder {
         value = value-1;
         return value;
     }
-    private static int loop(int InputVal){
+    private static int loop(int curVal) {
         int returnVal = 0;
-        int startingVal = InputVal;
-        if(startingVal==0){
+        int startingVal = curVal;
+        if (startingVal == 0) {
             returnVal = startingVal;
-        }else{
-            int startingPos = opCodeHold.indexOf(lineCounter);
-            System.out.println(startingPos);
-            int endPos =  opCodeHold.indexOf("end");
-            System.out.println(endPos);
-            System.exit(0);
+        } else {
+            int startingPos = opCodeHold.indexOf("while");
+            int endPos = opCodeHold.indexOf("end");
+            int currentPos = startingPos + 1;
+            int varPoint = 0;
+            int max = endPos;
+            String opcodeString;
+            String operandString;
+            lineCounter = 0;
+
+            while (currentPos < max || startingVal!= 0) {
+                opcodeString = opCodeHold.get(currentPos);
+                operandString = opErandHold.get(currentPos);
+
+
+                //if(variableHolder.contains(operandString)!=true){ // placing variables in array in order of creation
+                //variableHolder.add(operandString);
+                //variableValue.add(0);
+                //}
+
+                if (opcodeString.contains("clear")) {
+                    variableValue.add(varPosition(operandString), clear(variableValue.get(varPosition(operandString))));
+                    returnVal = variableValue.get(varPosition(operandString));
+                    currentPos++;
+                    return returnVal;
+
+                } else if (opcodeString.contains("incr")) {
+                    variableValue.add(varPosition(operandString), incr((variableValue.get(varPosition(operandString)))));
+                    returnVal = variableValue.get(varPosition(operandString));
+                    currentPos++;
+                    return returnVal;
+
+                } else if (opcodeString.contains("decr")) {
+                    variableValue.add(varPosition(operandString), decr((variableValue.get(varPosition(operandString)))));
+                    returnVal = variableValue.get(varPosition(operandString));
+
+                    currentPos++;
+                    return returnVal;
+                    // }else if(opcodeString.contains("while")) {
+                    //variableValue.add(varPosition(operandString),loop(variableValue.get(varPosition(operandString))));
+                    //}
+
+                } else {
+                    returnVal = 0;
+                    System.exit(0);
+                    return returnVal;
+                }
+
+
+
+            }
+
+
         }
+
         return returnVal;
     }
-
-
-
-
-
-
-
 
 
 
