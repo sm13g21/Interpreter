@@ -4,20 +4,29 @@ import java.util.*;
 
 public class Main {
 
-public Scanner scan = new Scanner(System.in);
-
+    private Scanner scan = new Scanner(System.in);
+    public static boolean addressCheck;
     private static String filePath;
 
     public static void main(String[] args) {
-        FReading FReading = new FReading();
+        FReading FREading = new FReading();
         Main MainClass = new Main();
-        String fileAddress = MainClass.addressGetter();
-        FReading.fileInputCheck(fileAddress);
-        if(FReading.checkAddress()==true){
-            com.company.FReading.fileReader(filePath);
+        Decoder decode = new Decoder();
+
+        String partialFileAddress = MainClass.addressGetter();
+        String fileAddress = FREading.filePathFull(partialFileAddress);
+
+        boolean addressCheck = FREading.fileInputCheck(fileAddress);
+        if(addressCheck==true){
+            FREading.fileReader(fileAddress);
         }else{
             System.out.println("Address not acceptable");
         }
+
+        decode.opCode(FREading.data);
+        decode.opErand(FREading.data);
+        decode.runInterpreter();
+
     }
 
     public String addressGetter(){
