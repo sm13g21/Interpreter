@@ -1,17 +1,23 @@
 package com.company;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class Decoder {
 
-    private static int lineCounter;
+
     private static int interpreterLine;
+    private int stackPointer = 0;
+    private int queuePointer = 0;
     private static ArrayList<String> opCodeHold = new ArrayList<String>(); // Holds opcode
     private static ArrayList<String> opErandHold = new ArrayList<String>(); // Holds Operand
 
+    private static ArrayList<String> funcName = new ArrayList<>();
+    private static ArrayList<Integer> funcLocation = new ArrayList<>();
+
     private static ArrayList<String> variableHolder = new ArrayList<String>(); // Holds variable values in order of creation
     private static ArrayList<Integer> variableValue = new ArrayList<Integer>();
-
+    private static Stack<Integer>  loopWhileLocation = new Stack<Integer>();
+    private static Queue<Integer> loopEndLocation = new LinkedList<>();
 
     public void opCode(ArrayList<String> arrayList){
         int maxSize = arrayList.size();
@@ -41,22 +47,22 @@ public class Decoder {
         }
     }
 
-    public void runInterpreter(){
-        interpretCode(opCodeHold, opErandHold);
+    public void runInterpreter(int lineLocation){
+        interpretCode(opCodeHold, opErandHold , lineLocation);
     }
 
 
-    public void interpretCode(ArrayList<String> opCode, ArrayList<String> opErand){
-        int currentPos = 0;
-        int varPoint = 0;
+    public void interpretCode(ArrayList<String> opCode, ArrayList<String> opErand, int lineLocation){
+        int currentPos = lineLocation;
+
         int max = opCodeHold.size();
         String opcodeString;
         String operandString;
-        lineCounter = 0;
+
         while(currentPos<max){
             opcodeString = opCode.get(currentPos);
             operandString = opErand.get(currentPos);
-            lineCounter++;
+
 
             if(variableHolder.contains(operandString)!=true){ // placing variables in array in order of creation
                 variableHolder.add(operandString);
@@ -77,13 +83,50 @@ public class Decoder {
                 System.out.println(variableValue.get(varPosition(operandString)));
                 currentPos++;
             }else if(opcodeString.contains("while")) {
-                variableValue.add(varPosition(operandString),loop(variableValue.get(varPosition(operandString))));
-                System.out.println(variableValue.get(varPosition(operandString)));
+                loopWhileLocation.push(currentPos);
+                stackPointer++;
+
+                loop(variableValue.get(varPosition(operandString)));
+
+            }else if(opcodeString.contains("end")){
+                if(variableValue.get(varPosition(operandString))==0){
+                    loopEndLocation.add(currentPos);
+                    System.out.println(currentPos);
+                    stackPointer--;
+                    queuePointer++;
+                    interpretCode(opCodeHold, opErandHold, (loopEndLocation.poll())+1);
+                }else{
+                    loop(loopWhileLocation.get(stackPointer-1));
+                }
+                // interpretCode(opCodeHold, opErandHold, (loopEndLocation.peek())+1);
+
+            }else if(opcodeString.contains("func")){
+                saveFunc(currentPos, operandString);
+            }
+            else if(opcodeString.contains("funcR")){
+                interpretCode(opCodeHold, opErandHold, funcLocation.get(funcName.indexOf(operandString)));
+            }
+
+            else if(opcodeString.contains("term")){
+                System.exit(0);
             }else{
                 System.exit(0);
             }
 
 
+        }
+    }
+
+    public void loop(int startingValue) {
+        interpretCode(opCodeHold, opErandHold, (loopWhileLocation.get(stackPointer - 1) + 1));
+    }
+    public void saveFunc(int currentPos, String operandString){
+        if(funcName.contains(operandString)){
+            funcName.add(operandString);
+            funcLocation.add(funcName.indexOf(operandString),currentPos);
+        }else{
+
+            funcLocation.add(funcName.indexOf(operandString),currentPos);
         }
     }
 
@@ -107,68 +150,6 @@ public class Decoder {
         int value = varValue;
         value = value-1;
         return value;
-    }
-    private static int loop(int curVal) {
-        int returnVal = 0;
-        int startingVal = curVal;
-        if (startingVal == 0) {
-            returnVal = startingVal;
-        } else {
-            int startingPos = opCodeHold.indexOf("while");
-            int endPos = opCodeHold.indexOf("end");
-            int currentPos = startingPos + 1;
-            int varPoint = 0;
-            int max = endPos;
-            String opcodeString;
-            String operandString;
-            lineCounter = 0;
-
-            while (currentPos < max || startingVal!= 0) {
-                opcodeString = opCodeHold.get(currentPos);
-                operandString = opErandHold.get(currentPos);
-
-
-                //if(variableHolder.contains(operandString)!=true){ // placing variables in array in order of creation
-                //variableHolder.add(operandString);
-                //variableValue.add(0);
-                //}
-
-                if (opcodeString.contains("clear")) {
-                    variableValue.add(varPosition(operandString), clear(variableValue.get(varPosition(operandString))));
-                    returnVal = variableValue.get(varPosition(operandString));
-                    currentPos++;
-                    return returnVal;
-
-                } else if (opcodeString.contains("incr")) {
-                    variableValue.add(varPosition(operandString), incr((variableValue.get(varPosition(operandString)))));
-                    returnVal = variableValue.get(varPosition(operandString));
-                    currentPos++;
-                    return returnVal;
-
-                } else if (opcodeString.contains("decr")) {
-                    variableValue.add(varPosition(operandString), decr((variableValue.get(varPosition(operandString)))));
-                    returnVal = variableValue.get(varPosition(operandString));
-
-                    currentPos++;
-                    return returnVal;
-                    // }else if(opcodeString.contains("while")) {
-                    //variableValue.add(varPosition(operandString),loop(variableValue.get(varPosition(operandString))));
-                    //}
-
-                } else {
-                    returnVal = 0;
-                    System.exit(0);
-                    return returnVal;
-                }
-
-
-
-            }
-
-
-        }
-
-        return returnVal;
     }
 
 

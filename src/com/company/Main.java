@@ -9,6 +9,7 @@ public class Main {
     private static String filePath;
 
     public static void main(String[] args) {
+
         FReading FREading = new FReading();
         Main MainClass = new Main();
         Decoder decode = new Decoder();
@@ -25,7 +26,7 @@ public class Main {
 
         decode.opCode(FREading.data);
         decode.opErand(FREading.data);
-        decode.runInterpreter();
+        decode.runInterpreter(0);
 
     }
 
